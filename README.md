@@ -119,25 +119,78 @@ so they can be imported from anywhere on the system.
 Place datasets under the repo root with these expected names:
 
 ```
-3dpw_data/
-h36m_data/
-fit3d_data/
-data/                # for 3DHP
+3dpw_data/          # 11 GB
+h36m_data/          # 1004 GB (1 TB)
+fit3d_data/         # 138 GB
+data/               # 977 GB (for 3DHP)
 ```
 
-### **Dataset notes**
+### **Dataset Structure & Sizes**
 
-| Dataset   | Expected Structure                                            |
-| --------- | ------------------------------------------------------------- |
-| **3DPW**  | dataset.json, videos inside `3dpw_data/`                      |
-| **H36M**  | MMPose-standard directory structure                           |
-| **3DHP**  | `.mat` annotations + images inside `data/`                    |
-| **Fit3D** | custom loaders expect the folder layout used in merge scripts |
+| Dataset   | Size   | Expected Structure                                            |
+| --------- | ------ | ------------------------------------------------------------- |
+| **3DPW**  | 11 GB  | `sequenceFiles/` (train/test), `processed_mmpose_shards/`     |
+| **H36M**  | 1 TB   | `images/images/` (extracted from tar.gz archives)             |
+| **3DHP**  | 977 GB | `test/` folders (TS1-TS6), each with `annot_data.mat` + `imageSequence/` |
+| **Fit3D** | 138 GB | Custom folder layout used in merge scripts                    |
 
-Your dataloader modules include:
+### **Detailed Directory Structure**
+
+#### **3DPW (`3dpw_data/`):**
+```
+3dpw_data/
+├── sequenceFiles/
+│   ├── train/
+│   └── test/
+└── processed_mmpose_shards/
+```
+
+#### **H36M (`h36m_data/`):**
+```
+h36m_data/
+└── images/
+    ├── images.tar.gzaa          # Split archives
+    ├── images.tar.gzab
+    ├── ...
+    └── images/                  # Extracted images
+        ├── s_01_act_12_subact_02_ca_01/
+        │   └── s_01_act_12_subact_02_ca_01_*.jpg
+        ├── s_08_act_11_subact_02_ca_01/
+        │   └── s_08_act_11_subact_02_ca_01_*.jpg
+        └── ...
+```
+
+**Note:** Extract all `images.tar.gz*` archives before running preprocessing.
+
+#### **3DHP (`data/`):**
+```
+data/
+└── test/
+    ├── TS1/
+    │   ├── annot_data.mat
+    │   └── imageSequence/
+    │       └── img_*.jpg
+    ├── TS2/
+    ├── TS3/
+    ├── TS4/
+    ├── TS5/
+    └── TS6/
+```
+
+#### **Fit3D (`fit3d_data/`):**
+```
+fit3d_data/
+└── (custom folder layout - see merge scripts)
+```
+
+### **Dataloader Modules**
+
+Your custom dataloader modules include:
 
 * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py`
 * `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
+* `mmpose/mmpose/datasets/datasets/body3d/pw3d_dataset.py`
+* `mmpose/mmpose/datasets/datasets/body3d/fit3d_dataset.py`
 
 ---
 

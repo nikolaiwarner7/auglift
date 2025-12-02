@@ -179,55 +179,7 @@ Modified to accept 4-channel input (X, Y, C, D) instead of standard 2-channel (X
 * Specified in pyconfig files
 * Support variable input channels (2, 3, or 4)
 
----
 
-## **Distributed Training**
-
-For multi-GPU training:
-
-```bash
-# 8 GPUs
-bash mmpose/tools/dist_train.sh \
-    path/to/config.py \
-    8 \
-    --work-dir work_dirs/experiment_name
-```
-
-Or with SLURM:
-
-```bash
-GPUS=8 bash mmpose/tools/slurm_train.sh \
-    partition_name \
-    job_name \
-    path/to/config.py \
-    work_dirs/experiment_name
-```
-
----
-
-## **Training Parameters**
-
-Common parameters to adjust in configs:
-
-```python
-# Batch size
-train_dataloader = dict(batch_size=64)
-
-# Learning rate
-optim_wrapper = dict(
-    optimizer=dict(lr=0.001)
-)
-
-# Training epochs
-train_cfg = dict(max_epochs=200)
-
-# Input features
-codec = dict(
-    type='ImagePoseLifting',
-    num_input_channels=4,  # XYCD
-    use_depth=True,
-)
-```
 
 ---
 
@@ -245,14 +197,6 @@ val_dataloader = dict(
 val_evaluator = dict(type='SimpleMeanMetric')
 ```
 
-### **After training:**
-
-```bash
-python mmpose/tools/test.py \
-    path/to/config.py \
-    work_dirs/experiment_name/best_model.pth \
-    --work-dir work_dirs/evaluation
-```
 
 ---
 
