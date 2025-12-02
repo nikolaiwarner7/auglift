@@ -61,6 +61,16 @@ This captures:
 * 2D detected keypoints (to model real-world errors)
 * (AugLift V2) Cached feature maps from RTMPose and DepthAnything
 
+### **AugLift Architecture Details (Section 3.2):**
+
+The preprocessing scripts implement key architectural components:
+
+* **Sparse Feature Fusion:** Extracting features at keypoint locations only
+* **Uncertainty-Aware Descriptors:** Sampling adaptive radius around keypoints
+* **Multi-scale Depth Statistics:** Computing min, max, point depth (CASP)
+
+These details correlate to **Section 3.2** of the paper.
+
 ### **Format conversion:**
 
 ⚠️ **Important:** 2D detections are in **COCO format**, but MMPose 3D trainer expects **H36M format**.
@@ -191,6 +201,12 @@ This creates `fit3d_train.npz` and `fit3d_test.npz`.
 We experimented with additional local depth statistics (mean, std, percentiles), but found that **just using min, max, and point depth** (called **CASP**) performed best.
 
 The statistics variant is referenced in some scripts but is not used in the final models.
+
+### **Implementation Details:**
+
+* **CASP (Context-Aware Sparse Pooling):** Min, max, and point depth at each keypoint
+* **Local Statistics Variant:** Mean, std, percentiles (underperformed CASP)
+* **Adaptive Radius Sampling:** Per Section 3.2, uncertainty-aware descriptor computation
 
 ---
 

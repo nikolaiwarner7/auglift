@@ -26,9 +26,11 @@ All based on the H36M dataset class but with custom naming and structure:
 * **Location:** `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py`
 * **Changes:**
   * Base class for all motion capture datasets
+  * **Key changes to load additional fields (C, D, feature maps) critical to AugLift method**
   * Handles camera coordinate systems
   * Supports XYCD input format
   * Root-relative keypoint handling
+  * Feature map loading for V2 experiments
 
 #### **`mpi_3dhp_inf_dataset.py`**
 * **Location:** `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
@@ -63,6 +65,7 @@ All based on the H36M dataset class but with custom naming and structure:
   * Root-relative normalization
   * Depth channel integration
   * Confidence score handling
+  * **Input normalization for additional channels (C, D)**
 
 ### **`poseformer_label.py`**
 * **Location:** `mmpose/mmpose/codecs/poseformer_label.py`
@@ -70,30 +73,60 @@ All based on the H36M dataset class but with custom naming and structure:
   * Modified for depth-augmented temporal sequences
   * Temporal window handling with 4 channels
   * Sequence padding for variable-length inputs
+  * Input normalization adjustments
+
+### **`motionbert_label.py`**
+* **Location:** `mmpose/mmpose/codecs/motionbert_label.py`
+* **Changes:**
+  * Camera-invariant codec for MotionBERT
+  * Requires GT root depth and focal length
+  * Many-to-many prediction support
+  * Input normalization for XYCD features
 
 ---
 
 ## **3. Model Architectures**
 
-### **PoseFormer Backbone**
-* **Location:** `mmpose/mmpose/models/backbones/poseformer.py`
+AugLift supports **4 architectures** with modified input layers for richer input formulations.
+
+### **PoseFormer (Many-to-One Transformer)**
+* **Backbone:** `mmpose/mmpose/models/backbones/poseformer.py`
+* **Head:** `mmpose/mmpose/models/heads/regression_heads/poseformer_regression_head.py`
 * **Changes:**
   * Input embedding layer modified for 4 channels
   * Positional encoding adapted for XYCD
   * Temporal attention with depth-aware features
-
-### **PoseFormer Regression Head**
-* **Location:** `mmpose/mmpose/models/heads/regression_heads/poseformer_regression_head.py`
-* **Changes:**
   * Accepts 4-channel input
   * Optional depth-only pathway
   * Multi-task loss support (3D pose + depth consistency)
+  * **Input layer sizes modified as specified in pyconfig**
 
-### **TCN Backbone**
-* **Location:** `mmpose/mmpose/models/backbones/tcn.py`
+### **MotionBERT (Many-to-Many Transformer)**
+* **Backbone:** `mmpose/mmpose/models/backbones/motionbert.py`
+* **Head:** `mmpose/mmpose/models/heads/regression_heads/motionbert_regression_head.py`
+* **Changes:**
+  * Input embedding layer modified for 4 channels
+  * Camera-invariant formulation
+  * Many-to-many prediction (multiple frames)
+  * Requires GT root depth and focal length for inference
+  * **Input layer sizes modified as specified in pyconfig**
+
+### **TCN / VideoPose3D (Temporal Convolution)**
+* **Backbone:** `mmpose/mmpose/models/backbones/tcn.py`
+* **Head:** `mmpose/mmpose/models/heads/regression_heads/temporal_regression_head.py`
 * **Changes:**
   * First conv layer modified for 4-channel input
   * Dilated convolutions with depth features
+  * Lightweight, second oldest architecture
+  * **Input layer sizes modified as specified in pyconfig**
+
+### **SimpleBaseline (Single Frame)**
+* **Head:** `mmpose/mmpose/models/heads/regression_heads/simple_regression_head.py`
+* **Changes:**
+  * Input layer modified for 4-channel input
+  * No temporal features
+  * Single-frame baseline
+  * **Input layer sizes modified as specified in pyconfig**
 
 ---
 
@@ -137,18 +170,28 @@ All based on the H36M dataset class but with custom naming and structure:
 
 **Key config files:**
 
-* `poseformer_h36m_config_img_depth_baselines.py`
-  * PoseFormer with XYCD input
-  * H36M-only training
+* **PoseFormer:**
+  * `poseformer_h36m_cross_eval_test_config.py` - Cross-dataset evaluation
+  * `poseformer_h36m_config_img_depth_baselines.py` - Depth baselines
+  * Configurations for each source dataset (H36M, 3DPW, 3DHP, Fit3D)
+  * Multiple sequence lengths (27, 81, 243 frames)
   
-* `poseformer_cross_dataset_config.py`
+* **SimpleBaseline:**
+  * `image-pose-lift_tcn_8xb64-200e_h36m_oct25_casp.py` - CASP depth features
+  * Single-frame configurations
+
+* **MotionBERT:**
+  * `motionbert_h36m_config.py` - Camera-invariant codec
+  * Many-to-many prediction configs
+  
+* **TCN/VideoPose3D:**
+  * `video_pose_lift_tcn_h36m.py` - Temporal convolution
+  
+* **Cross-Dataset:**
   * Joint training on H36M + 3DPW + 3DHP + Fit3D
   * Balanced sampling across datasets
   * Shared coordinate system handling
-
-* `image-pose-lift_tcn_8xb64-200e_h36m_oct25_casp.py`
-  * TCN with CASP (min/max/point) depth features
-  * Faster training than PoseFormer
+  * Per Section 4.1 of paper
 
 ---
 
@@ -157,12 +200,17 @@ All based on the H36M dataset class but with custom naming and structure:
 ### **Launcher Scripts**
 
 * `mmpose/tools/launch_train_cross_datasets_may_25_pf.sh`
-  * PoseFormer cross-dataset training
-  * Multi-GPU distribution
+  * PoseFormer **inner loop** (single configuration)
+  * Cross-dataset training
+  * Multi-GPU distribution via SLURM
   
 * `mmpose/tools/launch_train_cross_datasets_may_25_poseformer_test_outer.sh`
-  * Hyperparameter sweep
-  * Outer loop over depth variants (point, min/max, CASP, feature maps)
+  * PoseFormer **outer loop** (hyperparameter sweep)
+  * Sweep across:
+    * Input representations (XY, XYC, XYD, XYCD, AugLift V2, Image-Features)
+    * Sequence lengths (27, 81, 243 frames)
+    * Datasets (H36M, 3DPW, 3DHP, Fit3D)
+  * Per Section 5 of paper (representation study primarily on PoseFormer)
 
 ---
 
@@ -174,6 +222,10 @@ All based on the H36M dataset class but with custom naming and structure:
   * Joint 2D pose + depth estimation
   * RTMDet → RTMPose → DepthAnything pipeline
   * Per-frame NPZ output
+  * **Implements AugLift architecture details (Section 3.2):**
+    * Sparse feature fusion
+    * Uncertainty-aware descriptors (adaptive radius sampling)
+    * CASP depth statistics (min, max, point)
 
 ### **XYCD Merging**
 
@@ -269,12 +321,15 @@ mmpose/
 | Component | Change | Purpose |
 |-----------|--------|---------|
 | **Input Format** | XY → XYCD (4 channels) | Add depth + confidence cues |
+| **Architectures** | +4 architectures (PF, MB, TCN, SB) | Multiple backbone options |
 | **Datasets** | +3DPW, 3DHP, Fit3D | Cross-dataset training |
 | **Coordinate System** | Global → Camera viewpoint | Consistent across datasets |
 | **Preprocessing** | +Depth estimation pipeline | Generate XYCD features |
-| **Codecs** | Root-relative + COCO→H36M | Handle format differences |
-| **Backbones** | 2-channel → 4-channel input | Process depth information |
+| **Codecs** | Root-relative + COCO→H36M + normalization | Handle format differences + richer inputs |
+| **Backbones** | 2-channel → 4-channel input (per pyconfig) | Process depth information |
 | **Evaluation** | +Cross-dataset metrics | Generalization testing |
+| **Representations** | 6 variants (XY, XYC, XYD, XYCD, V2, Img-Feat) | Section 5 ablation study |
+| **base_mocap_dataset** | Load C, D, feature maps | Critical for AugLift method |
 
 ---
 

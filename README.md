@@ -216,17 +216,22 @@ AugLift extends MMPose with several custom components. See [docs/CHANGES.md](doc
 * Custom dataset classes for 3DPW, 3DHP, and Fit3D (based on H36M class with custom naming)
 * Modified 3D evaluator to align coordinate systems across all 4 datasets
 * Custom dataloaders: 
-  * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py`
+  * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py` - **Key changes to load C, D, feature maps**
   * `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
+  * `mmpose/mmpose/datasets/datasets/body3d/pw3d_dataset.py`
+  * `mmpose/mmpose/datasets/datasets/body3d/fit3d_dataset.py`
 
 ### **Training:**
-* Depth-augmented PoseFormer and TCN backbones
-* Custom regression heads for XYCD input
+* **4 architectures:** PoseFormer (many-to-one transformer), MotionBERT (many-to-many transformer), TCN (temporal convolution), SimpleBaseline (single-frame)
+* Input layer sizes modified for richer input formulations (specified in pyconfigs)
+* Custom regression heads for XYCD input (all architectures)
 * Modified codecs:
-  * `mmpose/mmpose/codecs/image_pose_lifting.py`
-  * `mmpose/mmpose/codecs/poseformer_label.py`
-* Cross-dataset training configurations
+  * `mmpose/mmpose/codecs/image_pose_lifting.py` - Input normalization for C, D
+  * `mmpose/mmpose/codecs/poseformer_label.py` - Temporal XYCD sequences
+  * `mmpose/mmpose/codecs/motionbert_label.py` - Camera-invariant codec
+* Cross-dataset training configurations (Section 4.1)
 * Root-relative keypoint handling in codecs
+* Representation study (XY, XYC, XYD, XYCD, AugLift V2, Image-Features) - Section 5
 
 ---
 
