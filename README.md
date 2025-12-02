@@ -164,7 +164,20 @@ See [docs/TRAINING.md](docs/TRAINING.md) for detailed instructions on:
 
 ---
 
-## **7. Reproducibility Checklist**
+## **7. Post-Training Analysis**
+
+See [docs/ANALYSIS.md](docs/ANALYSIS.md) for detailed instructions on:
+
+* Quantitative metrics comparison (MPJPE, PCK3D, ordinal depth)
+* Occlusion analysis (frame-level, joint-level, depth-based)
+* Domain similarity analysis (OOD generalization)
+* 2D detection quality robustness
+* Angle/orientation error analysis
+* Qualitative visualizations for paper figures
+
+---
+
+## **8. Reproducibility Checklist**
 
 - [ ] Clone AugLift
 - [ ] Install dependencies (PyTorch + MMPose + DepthAnything V2)
@@ -174,10 +187,11 @@ See [docs/TRAINING.md](docs/TRAINING.md) for detailed instructions on:
 - [ ] Run XYCD merge scripts
 - [ ] Train with provided configs
 - [ ] Evaluate on matched test splits
+- [ ] Run post-training analysis (metrics, occlusion, visualizations)
 
 ---
 
-## **8. Repository Structure**
+## **9. Repository Structure**
 
 ```
 auglift/
@@ -195,9 +209,11 @@ auglift/
 │       └── Depth-Anything-V2/
 │           └── metric_depth/        # Depth scripts
 ├── 2_3_merge_xycd_npz_*.py         # XYCD merge utilities
+├── poseformer_metrics_simple.py    # Post-training analysis script
 ├── docs/                            # Documentation
 │   ├── PREPROCESSING.md             # Data preprocessing guide
 │   ├── TRAINING.md                  # Training guide
+│   ├── ANALYSIS.md                  # Post-training analysis guide
 │   └── CHANGES.md                   # Changelist vs MMPose
 ├── setup.py                         # Package setup
 ├── pyproject.toml                   # Build config
@@ -206,7 +222,7 @@ auglift/
 
 ---
 
-## **9. Changes vs MMPose Base**
+## **10. Changes vs MMPose Base**
 
 AugLift extends MMPose with several custom components. See [docs/CHANGES.md](docs/CHANGES.md) for the full changelist.
 
