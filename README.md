@@ -1,5 +1,8 @@
 # **AugLift: Depth-Augmented 3D Human Pose Lifting**
 
+> **⚠️ WORK IN PROGRESS**  
+> This repository is currently under active development for reproducibility and camera-ready submission.
+
 AugLift is a research fork built on **MMPose (OpenMMLab)** and **DepthAnything V2**, designed to improve 3D lifting by adding **ordinal / metric depth cues**, **confidence channels**, and **depth-augmented PoseFormer / TCN backbones**.
 
 This repo includes:
@@ -11,6 +14,34 @@ This repo includes:
 * XYCD merge utilities
 * cross-dataset training scripts
 * evaluation utilities
+
+---
+
+## **📋 TODO for Camera-Ready Submission**
+
+**Current Status:** Repository contains core training/evaluation code with documentation for basic understanding of our paper.
+
+### **Remaining Work:**
+
+- [ ] **Add all custom files to repository**
+  - [ ] Custom evaluators (`mmpose/mmpose/evaluation/metrics/`)
+  - [ ] Custom codecs (`mmpose/mmpose/codecs/`)
+  - [ ] Custom model architectures (`mmpose/mmpose/models/`)
+  - [ ] Custom dataset classes (`mmpose/mmpose/datasets/`)
+  - [ ] Training configs (`mmpose/configs/`)
+
+- [ ] **Code cleanup and refactoring**
+  - [ ] Refactor analysis scripts (currently monolithic `poseformer_metrics_simple.py`)
+  - [ ] Add inline documentation and type hints
+  - [ ] Clean up experimental/debug code
+
+- [ ] **Complete MMPose fork**
+  - [ ] Package full MMPose fork with all custom modifications
+  - [ ] Create installation script for dependencies
+
+- [ ] **Upload shared data store**
+
+**Expected Timeline:** Camera-ready deadline
 
 ---
 
@@ -189,7 +220,7 @@ Your custom dataloader modules include:
 
 * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py`
 * `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
-* `mmpose/mmpose/datasets/datasets/body3d/pw3d_dataset.py`
+* `mmpose/mmpose/datasets/datasets/body3d/3dpw_dataset.py`
 * `mmpose/mmpose/datasets/datasets/body3d/fit3d_dataset.py`
 
 ---
@@ -287,7 +318,7 @@ AugLift extends MMPose with several custom components. See [docs/CHANGES.md](doc
 * Custom dataloaders: 
   * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py` - **Key changes to load C, D, feature maps**
   * `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
-  * `mmpose/mmpose/datasets/datasets/body3d/pw3d_dataset.py`
+  * `mmpose/mmpose/datasets/datasets/body3d/3pdw_dataset.py`
   * `mmpose/mmpose/datasets/datasets/body3d/fit3d_dataset.py`
 
 ### **Training:**

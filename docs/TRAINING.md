@@ -194,7 +194,7 @@ val_cfg = dict()
 val_dataloader = dict(
     dataset=dict(ann_file='val_annotations.npz')
 )
-val_evaluator = dict(type='SimpleMeanMetric')
+val_evaluator = dict(type='ExampleMetric')
 ```
 
 
@@ -214,11 +214,6 @@ work_dirs/experiment_name/
     └── scalars.json       # Training metrics
 ```
 
-View with TensorBoard:
-
-```bash
-tensorboard --logdir work_dirs/experiment_name
-```
 
 ---
 
@@ -284,7 +279,7 @@ codec = dict(
   * Critical to AugLift method
 * **H36M:** Uses base_mocap_dataset
 * **3DHP:** `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
-* **3DPW:** `mmpose/mmpose/datasets/datasets/body3d/pw3d_dataset.py`
+* **3DPW:** `mmpose/mmpose/datasets/datasets/body3d/3dpw_dataset.py`
 * **Fit3D:** `mmpose/mmpose/datasets/datasets/body3d/fit3d_dataset.py`
 
 ### **Model Definitions:**
