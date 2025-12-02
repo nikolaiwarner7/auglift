@@ -18,32 +18,45 @@ This repo includes:
 
 AugLift requires **Python 3.10**, **PyTorch**, **MMPose**, **DepthAnything V2**, and our custom modules.
 
-### **1.1. Create a Conda environment**
+### **STEP 1: Create the Base MMPose Environment**
+
+First, create a clean baseline MMPose environment:
 
 ```bash
 conda create -n auglift python=3.10 -y
 conda activate auglift
 ```
 
----
-
-### **1.2. Install PyTorch**
-
-Select the CUDA version used on your cluster:
+Install PyTorch (select the CUDA version used on your cluster):
 
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
 
----
-
-### **1.3. Install MMEngine, MMCV, and MMPose**
+Install MMPose dependencies:
 
 ```bash
 pip install -U openmim
 mim install mmengine
 mim install "mmcv>=2.0.0"
 mim install "mmpose>=1.2.0"
+```
+
+---
+
+### **STEP 2: Update Environment with AugLift Dependencies**
+
+After creating the base environment, update it with our custom dependencies:
+
+```bash
+conda env update -f openmmlab_env.yml --prune
+```
+
+Or, if updating an existing environment:
+
+```bash
+conda activate auglift
+conda env update -f openmmlab_env.yml --prune
 ```
 
 ---
