@@ -141,109 +141,30 @@ Your dataloader modules include:
 
 ---
 
-## **5. Depth Estimation Pipelines**
+## **5. Preprocessing AugLift Data**
 
-Depth scripts are located in:
+See [docs/PREPROCESSING.md](docs/PREPROCESSING.md) for detailed instructions on:
 
-```
-coarse_depth_experiments/Depth-Anything-OfficialV2/Depth-Anything-V2/metric_depth/
-```
-
-Example command:
-
-```bash
-python metric_depth/1_30_estimate_depth_proto_loop_metric_h36m_v3_sampling_patch_statistics.py
-```
-
-Each dataset has its own:
-
-* prototype depth estimator
-* loop scripts (`launch_depth_metric_loop_*.sh`)
-* outer-loop sampling scripts
-
-These scripts output cached **metric depth NPZ files** used during XYCD merging.
+* Running MMPose preprocessing on raw images and annotations
+* Depth estimation and 2D pose detection pipelines
+* XYCD feature merging
+* Feature map caching (AugLift V2)
+* SLURM distribution scripts
 
 ---
 
-## **6. XYCD Merge Utilities**
+## **6. Training AugLift Models**
 
-Scripts like:
+See [docs/TRAINING.md](docs/TRAINING.md) for detailed instructions on:
 
-```
-2_3_merge_xycd_npz_h36m.py
-2_3_merge_xycd_npz_fit3d.py
-2_3_merge_xycd_npz_3dpw.py
-2_3_merge_xycd_npz_3dhp.py
-```
-
-combine:
-
-* XY keypoints
-* C confidence
-* D depth
-* dataset metadata
-
-Usage example:
-
-```bash
-python 2_3_merge_xycd_npz_h36m.py
-```
-
-Fit3D split helper:
-
-```bash
-python 2_25_split_fit3d_train_test.py
-```
+* Training configuration
+* Cross-dataset training
+* Model architectures and variants
+* Evaluation protocols
 
 ---
 
-## **7. Custom Codecs, Backbones, & Heads**
-
-### **Codecs**
-
-* `mmpose/mmpose/codecs/image_pose_lifting.py`
-* `mmpose/mmpose/codecs/poseformer_label.py` (modified)
-
-### **Model Definitions**
-
-* `mmpose/mmpose/models/backbones/poseformer.py`
-* `mmpose/mmpose/models/heads/regression_heads/poseformer_regression_head.py`
-
-### **Configs**
-
-Including:
-
-```
-mmpose/configs/body_3d_keypoint/image_pose_lift/h36m/image-pose-lift_tcn_8xb64-200e_h36m_oct25_casp.py
-mmpose/configs/body_3d_keypoint/poseformer/h36m/poseformer_h36m_config_img_depth_baselines.py
-```
-
-Training scripts:
-
-```
-mmpose/tools/launch_train_cross_datasets_may_25_poseformer_test_outer.sh
-mmpose/tools/launch_train_cross_datasets_may_25_pf.sh
-```
-
----
-
-## **8. Training AugLift**
-
-Using Bash launcher scripts:
-
-```bash
-bash mmpose/tools/launch_train_cross_datasets_may_25_poseformer_test_outer.sh
-```
-
-Or directly with MMEngine:
-
-```bash
-python tools/train.py path/to/config.py
-```
-
----
-
-## **9. Reproducibility Checklist**
+## **7. Reproducibility Checklist**
 
 - [ ] Clone AugLift
 - [ ] Install dependencies (PyTorch + MMPose + DepthAnything V2)
@@ -256,7 +177,7 @@ python tools/train.py path/to/config.py
 
 ---
 
-## **10. Repository Structure**
+## **8. Repository Structure**
 
 ```
 auglift/
@@ -274,10 +195,38 @@ auglift/
 │       └── Depth-Anything-V2/
 │           └── metric_depth/        # Depth scripts
 ├── 2_3_merge_xycd_npz_*.py         # XYCD merge utilities
+├── docs/                            # Documentation
+│   ├── PREPROCESSING.md             # Data preprocessing guide
+│   ├── TRAINING.md                  # Training guide
+│   └── CHANGES.md                   # Changelist vs MMPose
 ├── setup.py                         # Package setup
 ├── pyproject.toml                   # Build config
 └── README.md                        # This file
 ```
+
+---
+
+## **9. Changes vs MMPose Base**
+
+AugLift extends MMPose with several custom components. See [docs/CHANGES.md](docs/CHANGES.md) for the full changelist.
+
+**Key modifications:**
+
+### **Preprocessing:**
+* Custom dataset classes for 3DPW, 3DHP, and Fit3D (based on H36M class with custom naming)
+* Modified 3D evaluator to align coordinate systems across all 4 datasets
+* Custom dataloaders: 
+  * `mmpose/mmpose/datasets/datasets/base/base_mocap_dataset.py`
+  * `mmpose/mmpose/datasets/datasets/body3d/mpi_3dhp_inf_dataset.py`
+
+### **Training:**
+* Depth-augmented PoseFormer and TCN backbones
+* Custom regression heads for XYCD input
+* Modified codecs:
+  * `mmpose/mmpose/codecs/image_pose_lifting.py`
+  * `mmpose/mmpose/codecs/poseformer_label.py`
+* Cross-dataset training configurations
+* Root-relative keypoint handling in codecs
 
 ---
 
